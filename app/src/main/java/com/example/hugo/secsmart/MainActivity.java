@@ -1,9 +1,15 @@
 package com.example.hugo.secsmart;
 
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 
 
 import android.app.ActionBar;
+import android.app.ListActivity;
+import android.app.ProgressDialog;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
@@ -21,6 +27,12 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
 import com.example.hugo.secsmart.R;
+import com.example.hugo.secsmart.dominio.Porta;
+import com.example.hugo.secsmart.utils.ConexaoHttp;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 public class MainActivity extends AppCompatActivity
 {
@@ -28,6 +40,8 @@ public class MainActivity extends AppCompatActivity
     private BluetoothAdapter mBluetoothAdapter = null;
     private ArrayAdapter<String> mNewDevicesArrayAdapter;
     public ListView newDevicesListView;
+
+    private ProgressDialog progressBar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -66,6 +80,13 @@ public class MainActivity extends AppCompatActivity
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_main, menu);
         return true;
+    }
+
+    @Override
+    protected void onStop()
+    {
+        unregisterReceiver(mReceiver);
+        super.onStop();
     }
 
     public void onClickbtnActivateBluetooth(View view)
@@ -126,6 +147,74 @@ public class MainActivity extends AppCompatActivity
 
 
     public void myDoors(MenuItem item) {
-        startActivity(new Intent(this, myDoors.class));
+        buscarPortas();
+    }
+
+    private List<Porta> gerarPortasFromJson(String dados) {
+        List<Porta> resultado = new ArrayList<Porta>();
+        try {
+            JSONObject jsonObject = new JSONObject(dados);
+            JSONObject emb = jsonObject.getJSONObject("_embedded");
+            JSONArray ja = emb.getJSONArray("fornecedores");
+            for(int i = 0; i<= ja.length(); i++) {
+                JSONObject jo = ja.getJSONObject(i);
+                Porta f = new Porta();
+                f.setNumero(jo.getString("nome"));
+                try {
+                    f.setEstado(jo.getString("cnpj"));
+                }catch (JSONException e) {
+                    f.setEstado(jo.getString("cpf"));
+                }
+                resultado.add(f);
+            }
+            return resultado;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return resultado;
+    }
+
+    public void buscarPortas() {
+        /*progressBar = new ProgressDialog(MainActivity.this);
+        progressBar.setCancelable(true);
+        progressBar.setMessage("Buscando...");
+        progressBar.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+        progressBar.setProgress(0);
+        progressBar.setMax(100);
+        progressBar.show(); */
+        new ListagemTask().execute();
+    }
+
+    private class ListagemTask extends
+            AsyncTask<String,Integer, List<Porta>> {
+
+        @Override
+        protected List<Porta> doInBackground(String... urls) {
+            String url = "http://compras.dados.gov.br/" +
+                    "fornecedores/v1/fornecedores.json?" +
+                    "uf=RN";
+            //publishProgress(10);
+            String resposta = ConexaoHttp.get(url);
+            return gerarPortasFromJson(resposta);
+        }
+        @Override
+        protected void onPostExecute(List<Porta> result) {
+            super.onPostExecute(result);
+            //publishProgress(100);
+            //progressBar.dismiss();
+            Intent i = new Intent(MainActivity.this, myDoors.class);
+            i.putExtra("fornecedores", (Serializable) result);
+            startActivity(i);
+        }
+        @Override
+        protected void onProgressUpdate(Integer... values) {
+            super.onProgressUpdate(values);
+            progressBar.setProgress(values[0]);
+        }
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            //publishProgress(10);
+        }
     }
 }

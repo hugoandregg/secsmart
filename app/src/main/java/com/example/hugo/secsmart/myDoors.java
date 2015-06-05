@@ -6,14 +6,31 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.ListView;
+
+import com.example.hugo.secsmart.adapter.PortaListaAdapter;
+import com.example.hugo.secsmart.dominio.Porta;
+
+import java.util.List;
 
 
 public class myDoors extends AppCompatActivity {
+    private ListView portasListView;
+    private PortaListaAdapter adapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_my_doors);
+
+        List<Porta> fornecedores = (List<Porta>)
+                getIntent().getSerializableExtra("fornecedores");
+
+        portasListView = (ListView) findViewById(R.id.listPortas);
+        adapter = new PortaListaAdapter(this,
+                R.layout.list_portas, fornecedores);
+
+        portasListView.setAdapter(adapter);
     }
 
     @Override
