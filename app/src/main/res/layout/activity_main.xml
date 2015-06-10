@@ -14,9 +14,12 @@
         android:layout_height="wrap_content"
         android:enabled="false"
         android:onClick="onClickbtnSearchDevices"
+        android:background="@drawable/buttonshape"
+        android:drawableLeft="@drawable/ic_search"
         android:text="buscar dispositivos"
         android:layout_alignParentTop="true"
-        android:layout_alignEnd="@+id/new_devices" />
+        android:layout_alignEnd="@+id/new_devices"
+        android:layout_toEndOf="@+id/btnEnableBT" />
 
     <Button
         android:id="@+id/btnEnableBT"
@@ -24,7 +27,10 @@
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
         android:layout_alignParentTop="true"
+        android:layout_marginRight="12dp"
+        android:drawableLeft="@drawable/ic_bluetooth"
         android:onClick="onClickbtnActivateBluetooth"
+        android:background="@drawable/buttonshape"
         android:text="ligar bluetooth" />
 
     <ListView
@@ -43,9 +49,18 @@
         android:textAppearance="?android:attr/textAppearanceLarge"
         android:text="Dispositivos"
         android:id="@+id/textView"
-        android:layout_marginTop="25dp"
+        android:layout_marginTop="20dp"
         android:layout_marginBottom="10dp"
         android:layout_below="@+id/btnSearchDevices"
         android:layout_centerHorizontal="true" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:text="Small Text"
+        android:id="@+id/macTxt"
+        android:layout_alignBottom="@+id/textView"
+        android:layout_alignParentStart="true" />
 
 </RelativeLayout>

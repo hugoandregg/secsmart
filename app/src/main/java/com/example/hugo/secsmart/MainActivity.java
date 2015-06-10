@@ -25,6 +25,7 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 import com.example.hugo.secsmart.R;
 import com.example.hugo.secsmart.dominio.Porta;
@@ -37,11 +38,10 @@ import org.json.JSONObject;
 public class MainActivity extends AppCompatActivity
 {
     private static final int REQUEST_ENABLE_BT = 1;
-    private BluetoothAdapter mBluetoothAdapter = null;
+    public static BluetoothAdapter mBluetoothAdapter = null;
     private ArrayAdapter<String> mNewDevicesArrayAdapter;
     public ListView newDevicesListView;
-
-    private ProgressDialog progressBar;
+    public TextView macTxt;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -59,7 +59,21 @@ public class MainActivity extends AppCompatActivity
                 Object listItem = newDevicesListView.getItemAtPosition(position);
                 Intent myIntent = new Intent(MainActivity.this, LockUnlock.class);
                 //((BluetoothDevice) listItem).getAddress();
-                myIntent.putExtra("device", ((BluetoothDevice) listItem));
+
+                final String info = listItem.toString();
+
+                //get the device address when click the device item
+                String address = info.substring(info.length() - 17).toUpperCase();
+
+                //connect the device when item is click
+                BluetoothDevice connect_device = null;
+                connect_device = BluetoothAdapter.getDefaultAdapter().getRemoteDevice(address);
+
+                if (connect_device == null){
+                    Toast.makeText(getApplicationContext(), "bluetooth não encontrado!", Toast.LENGTH_LONG).show();
+                }
+
+                myIntent.putExtra("device", (connect_device));
                 MainActivity.this.startActivity(myIntent);
             }
         });
@@ -72,6 +86,8 @@ public class MainActivity extends AppCompatActivity
         filter = new IntentFilter(BluetoothAdapter.ACTION_DISCOVERY_FINISHED);
         this.registerReceiver(mReceiver, filter);
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+        macTxt = (TextView) findViewById(R.id.macTxt);
+        macTxt.setText(mBluetoothAdapter.getAddress());
     }
 
     @Override
@@ -85,7 +101,6 @@ public class MainActivity extends AppCompatActivity
     @Override
     protected void onStop()
     {
-        unregisterReceiver(mReceiver);
         super.onStop();
     }
 
@@ -150,21 +165,18 @@ public class MainActivity extends AppCompatActivity
         buscarPortas();
     }
 
+    //https://secsmart.herokuapp.com/users
     private List<Porta> gerarPortasFromJson(String dados) {
         List<Porta> resultado = new ArrayList<Porta>();
         try {
             JSONObject jsonObject = new JSONObject(dados);
-            JSONObject emb = jsonObject.getJSONObject("_embedded");
-            JSONArray ja = emb.getJSONArray("fornecedores");
+            //JSONObject emb = jsonObject.getJSONObject("_embedded");
+            JSONArray ja = jsonObject.getJSONArray("doors");
             for(int i = 0; i<= ja.length(); i++) {
                 JSONObject jo = ja.getJSONObject(i);
                 Porta f = new Porta();
-                f.setNumero(jo.getString("nome"));
-                try {
-                    f.setEstado(jo.getString("cnpj"));
-                }catch (JSONException e) {
-                    f.setEstado(jo.getString("cpf"));
-                }
+                f.setNumero(jo.getString("name"));
+                f.setEstado(jo.getString("state"));
                 resultado.add(f);
             }
             return resultado;
@@ -175,13 +187,6 @@ public class MainActivity extends AppCompatActivity
     }
 
     public void buscarPortas() {
-        /*progressBar = new ProgressDialog(MainActivity.this);
-        progressBar.setCancelable(true);
-        progressBar.setMessage("Buscando...");
-        progressBar.setProgressStyle(ProgressDialog.STYLE_SPINNER);
-        progressBar.setProgress(0);
-        progressBar.setMax(100);
-        progressBar.show(); */
         new ListagemTask().execute();
     }
 
@@ -190,31 +195,24 @@ public class MainActivity extends AppCompatActivity
 
         @Override
         protected List<Porta> doInBackground(String... urls) {
-            String url = "http://compras.dados.gov.br/" +
-                    "fornecedores/v1/fornecedores.json?" +
-                    "uf=RN";
-            //publishProgress(10);
+            String url = "https://secsmart.herokuapp.com/" + mBluetoothAdapter.getAddress() + ".json";
             String resposta = ConexaoHttp.get(url);
             return gerarPortasFromJson(resposta);
         }
         @Override
         protected void onPostExecute(List<Porta> result) {
             super.onPostExecute(result);
-            //publishProgress(100);
-            //progressBar.dismiss();
             Intent i = new Intent(MainActivity.this, myDoors.class);
-            i.putExtra("fornecedores", (Serializable) result);
+            i.putExtra("portas", (Serializable) result);
             startActivity(i);
         }
         @Override
         protected void onProgressUpdate(Integer... values) {
             super.onProgressUpdate(values);
-            progressBar.setProgress(values[0]);
         }
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
-            //publishProgress(10);
         }
     }
 }

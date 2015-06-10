@@ -23,12 +23,12 @@ public class myDoors extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_my_doors);
 
-        List<Porta> fornecedores = (List<Porta>)
-                getIntent().getSerializableExtra("fornecedores");
+        List<Porta> portas = (List<Porta>)
+                getIntent().getSerializableExtra("portas");
 
         portasListView = (ListView) findViewById(R.id.listPortas);
         adapter = new PortaListaAdapter(this,
-                R.layout.list_portas, fornecedores);
+                R.layout.list_portas, portas);
 
         portasListView.setAdapter(adapter);
     }

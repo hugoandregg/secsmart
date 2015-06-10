@@ -32,10 +32,10 @@ public class PortaListaAdapter extends ArrayAdapter<Porta> {
 
         Porta item = getItem(position);
         if (item!= null) {
-            TextView titleText = (TextView) view.findViewById(R.id.nomeText);
-            titleText.setText( item.getNumero() );
-            TextView cnpjText = (TextView) view.findViewById(R.id.cnpjText);
-            cnpjText.setText(item.getEstado());
+            TextView nameText = (TextView) view.findViewById(R.id.numberText);
+            nameText.setText( item.getNumero() );
+            TextView stateText = (TextView) view.findViewById(R.id.stateText);
+            stateText.setText(item.getEstado());
 
         }
 

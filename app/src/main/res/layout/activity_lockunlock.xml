@@ -13,11 +13,13 @@
         <ToggleButton
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textOn="Destravar"
-            android:textOff="Travar"
+            android:textOn="  Destravar"
+            android:textOff="  Travar"
             android:id="@+id/trvBtn"
             android:layout_marginTop="67dp"
             android:checked="false"
+            android:background="@drawable/tglbtn"
+            android:drawableLeft="@drawable/ic_lock"
             android:layout_below="@+id/dvcText"
             android:layout_centerHorizontal="true" />
 
@@ -37,6 +39,8 @@
             android:text="Minhas portas"
             android:id="@+id/doorBtn"
             android:onClick="myDoors"
+            android:drawableLeft="@drawable/ic_search"
+            android:background="@drawable/buttonshape"
             android:layout_alignParentBottom="true"
             android:layout_centerHorizontal="true"
             android:layout_marginBottom="43dp" />
