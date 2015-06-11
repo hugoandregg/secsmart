@@ -58,13 +58,10 @@ public class MainActivity extends AppCompatActivity
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 Object listItem = newDevicesListView.getItemAtPosition(position);
                 Intent myIntent = new Intent(MainActivity.this, LockUnlock.class);
-                //((BluetoothDevice) listItem).getAddress();
 
                 final String info = listItem.toString();
-
                 //get the device address when click the device item
                 String address = info.substring(info.length() - 17).toUpperCase();
-
                 //connect the device when item is click
                 BluetoothDevice connect_device = null;
                 connect_device = BluetoothAdapter.getDefaultAdapter().getRemoteDevice(address);
@@ -86,8 +83,6 @@ public class MainActivity extends AppCompatActivity
         filter = new IntentFilter(BluetoothAdapter.ACTION_DISCOVERY_FINISHED);
         this.registerReceiver(mReceiver, filter);
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-        macTxt = (TextView) findViewById(R.id.macTxt);
-        macTxt.setText(mBluetoothAdapter.getAddress());
     }
 
     @Override
